@@ -3,13 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Janto V. Sulungbudi · Dosen Fisika UNPAR</title>
-    <!-- Font elegan & modern -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <!-- Font Awesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>FaceMesh Detection - MediaPipe</title>
     <style>
         * {
             margin: 0;
@@ -18,740 +12,552 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(145deg, #0a0a0a 0%, #1a1a2e 100%);
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            background: linear-gradient(145deg, #f5f0eb 0%, #e8e0d8 100%);
+            align-items: center;
             padding: 1.5rem;
-            position: relative;
-            overflow-x: hidden;
+            color: #fff;
         }
 
-        /* background ornamen */
-        .bg-ornament {
-            position: fixed;
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 300;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            background: #0d0d1a;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            aspect-ratio: 16 / 9;
+        }
+
+        .video-wrapper video {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        .video-wrapper canvas {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            transform: scaleX(-1);
             pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
         }
 
-        .bg-ornament span {
-            position: absolute;
-            display: block;
-            width: 20px;
-            height: 20px;
-            background: rgba(180, 140, 110, 0.06);
-            border-radius: 50%;
-            animation: float 18s infinite alternate ease-in-out;
-        }
-
-        .bg-ornament span:nth-child(1) { top: 10%; left: 5%; width: 60px; height: 60px; animation-duration: 22s; }
-        .bg-ornament span:nth-child(2) { top: 70%; left: 85%; width: 40px; height: 40px; animation-duration: 26s; background: rgba(200, 170, 140, 0.05); }
-        .bg-ornament span:nth-child(3) { top: 40%; left: 20%; width: 80px; height: 80px; animation-duration: 20s; background: rgba(160, 130, 100, 0.04); }
-        .bg-ornament span:nth-child(4) { top: 80%; left: 10%; width: 30px; height: 30px; animation-duration: 28s; }
-        .bg-ornament span:nth-child(5) { top: 15%; left: 75%; width: 50px; height: 50px; animation-duration: 24s; background: rgba(190, 160, 130, 0.05); }
-        .bg-ornament span:nth-child(6) { top: 55%; left: 60%; width: 70px; height: 70px; animation-duration: 30s; background: rgba(140, 110, 80, 0.03); }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            100% { transform: translate(40px, -30px) scale(1.2) rotate(15deg); }
-        }
-
-        /* Kartu utama */
-        .card {
-            position: relative;
-            z-index: 10;
-            max-width: 860px;
-            width: 100%;
-            background: rgba(255, 251, 247, 0.85);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border-radius: 3.5rem 3.5rem 3.5rem 1.5rem;
-            box-shadow: 
-                0 30px 60px -20px rgba(60, 40, 25, 0.25),
-                0 8px 20px rgba(0, 0, 0, 0.03),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            padding: 2.8rem 3rem;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 242, 235, 0.5);
-        }
-
-        @media (max-width: 550px) {
-            .card {
-                padding: 2rem 1.5rem;
-                border-radius: 2.5rem 2.5rem 2.5rem 1rem;
-            }
-        }
-
-        /* --- VIDEO STREAM --- */
-        .video-stream-wrapper {
-            margin-bottom: 2rem;
-            border-radius: 2rem;
-            overflow: hidden;
-            box-shadow: 0 12px 30px rgba(60, 40, 25, 0.12), inset 0 1px 0 rgba(255,255,255,0.3);
-            border: 1px solid rgba(200, 180, 165, 0.3);
-            background: #1a1410;
-            position: relative;
-            min-height: 200px;
-        }
-
-        .video-stream-wrapper video {
-            display: block;
-            width: 100%;
-            height: auto;
-            aspect-ratio: 16 / 9;
-            background: #0d0a08;
-            object-fit: cover;
-        }
-
-        .video-stream-wrapper .video-label {
-            position: absolute;
-            bottom: 1rem;
-            left: 1.2rem;
-            background: rgba(20, 16, 12, 0.75);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            color: #f0e7df;
-            font-size: 0.75rem;
-            padding: 0.3rem 1rem;
-            border-radius: 40px;
-            letter-spacing: 0.3px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .status-bar {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .video-stream-wrapper .video-label i {
-            font-size: 0.7rem;
-            color: #b8a08e;
-        }
-
-        .video-stream-wrapper .live-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #e05a4f;
-            border-radius: 50%;
-            margin-right: 0.2rem;
-            animation: pulse-dot 1.8s infinite;
-        }
-
-        @keyframes pulse-dot {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        /* Fallback untuk jika stream gagal */
-        .stream-fallback {
-            display: none;
-            padding: 2rem;
-            text-align: center;
-            color: #b8a08e;
-            background: #0d0a08;
-            min-height: 200px;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .stream-fallback i {
-            font-size: 3rem;
-            color: #5a4a3e;
-        }
-
-        .stream-fallback p {
-            font-size: 0.95rem;
-            max-width: 400px;
-            line-height: 1.6;
-        }
-
-        .stream-fallback .btn-stream {
-            display: inline-block;
-            background: #2c241e;
-            color: #f0e7df;
-            padding: 0.6rem 1.8rem;
-            border-radius: 40px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.2s;
-        }
-
-        .stream-fallback .btn-stream:hover {
-            background: #3d322a;
-            transform: scale(1.02);
-        }
-
-        /* header */
-        .header {
-            display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 2.2rem;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding: 0.8rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.8rem;
         }
 
-        .badge-unpar {
-            display: inline-flex;
+        .status-item {
+            display: flex;
             align-items: center;
             gap: 0.6rem;
-            background: #2c241e;
-            color: #f2e7df;
-            padding: 0.5rem 1.5rem 0.5rem 1.2rem;
-            border-radius: 60px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            letter-spacing: 0.3px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .badge-unpar i {
-            font-size: 1rem;
-            color: #d4b8a0;
+        .status-item .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
         }
 
-        .divider-line {
-            flex: 1;
-            height: 2px;
-            min-width: 40px;
-            background: linear-gradient(90deg, #dacfc6, transparent);
-            margin-left: 0.5rem;
+        .dot.active {
+            background: #4ade80;
+            animation: pulse 1.5s infinite;
         }
 
-        /* identity */
-        .identity {
-            margin-bottom: 2rem;
+        .dot.inactive {
+            background: #f87171;
         }
 
-        .nama {
-            font-size: 3.8rem;
-            font-weight: 700;
-            line-height: 1.1;
-            letter-spacing: -0.02em;
-            color: #1e1612;
-            margin-bottom: 0.3rem;
+        .dot.loading {
+            background: #fbbf24;
+            animation: pulse 0.8s infinite;
         }
 
-        .nama span {
-            background: linear-gradient(135deg, #a67b5c, #7a5d46);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
         }
 
-        .profesi {
+        .controls {
             display: flex;
-            align-items: center;
+            gap: 0.8rem;
             flex-wrap: wrap;
-            gap: 0.8rem 1.5rem;
-            font-size: 1.35rem;
-            font-weight: 400;
-            color: #3e322a;
-            border-bottom: 2px solid rgba(180, 150, 130, 0.2);
-            padding-bottom: 1rem;
         }
 
-        .profesi i {
-            color: #a77b5e;
-            margin-right: 0.3rem;
-            width: 1.6rem;
-            text-align: center;
-        }
-
-        .profesi .badge-fisika {
-            background: #e8ddd4;
-            padding: 0.2rem 1.2rem;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            color: #3d2c20;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .profesi .badge-fisika i {
-            font-size: 0.9rem;
-            margin-right: 0;
-        }
-
-        /* motto */
-        .motto {
-            margin: 2rem 0 2.2rem 0;
-            padding: 0.8rem 1.8rem;
-            background: rgba(220, 200, 185, 0.2);
-            border-left: 4px solid #b49278;
-            border-radius: 0 30px 30px 0;
-            font-style: italic;
-            font-weight: 300;
-            font-size: 1.15rem;
-            color: #3d322b;
-            letter-spacing: 0.2px;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            backdrop-filter: blur(2px);
-        }
-
-        .motto i {
-            color: #b49278;
-            font-size: 1.6rem;
-            opacity: 0.7;
-        }
-
-        .motto q {
-            quotes: "“" "”" "‘" "’";
-        }
-
-        /* bio */
-        .bio-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            margin-top: 0.8rem;
-            align-items: flex-end;
-        }
-
-        .bio-text {
-            flex: 2;
-            min-width: 200px;
-        }
-
-        .bio-text p {
-            font-size: 1rem;
-            line-height: 1.7;
-            color: #3d342e;
-            font-weight: 400;
-            margin-bottom: 1.2rem;
-        }
-
-        .bio-text p i {
-            color: #8d6b53;
-            width: 1.6rem;
-            margin-right: 0.2rem;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 0.9rem;
-            flex-wrap: wrap;
-            margin-top: 0.8rem;
-        }
-
-        .social-links a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 60px;
-            background: rgba(50, 38, 30, 0.04);
-            color: #3d322a;
-            font-size: 1.2rem;
-            transition: all 0.2s ease;
-            border: 1px solid rgba(180, 155, 135, 0.15);
-            text-decoration: none;
-            backdrop-filter: blur(2px);
-        }
-
-        .social-links a:hover {
-            background: #2c241e;
-            color: #f0e3da;
-            border-color: #2c241e;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 18px rgba(60, 40, 25, 0.12);
-        }
-
-        .btn-kontak {
-            flex: 0 0 auto;
-            background: #2c241e;
-            color: #f5ede7;
-            padding: 0.9rem 2.2rem;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.7rem;
+        .btn {
+            padding: 0.5rem 1.5rem;
             border: none;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 8px 18px rgba(44, 36, 30, 0.15);
-            cursor: default;
-            letter-spacing: 0.3px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .btn-kontak i {
+        .btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #f5a3ff, #f66a7d);
+            box-shadow: 0 4px 20px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.5);
+        }
+
+        .face-count {
+            font-weight: 600;
+            color: #f093fb;
             font-size: 1.1rem;
-            color: #dac0ae;
         }
 
-        .btn-kontak:hover {
-            background: #1f1814;
-            transform: scale(1.01);
-            box-shadow: 0 12px 24px rgba(44, 36, 30, 0.2);
-        }
-
-        .footer-note {
-            margin-top: 2.8rem;
-            font-size: 0.75rem;
-            color: #89786b;
-            letter-spacing: 0.5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid rgba(180, 155, 135, 0.15);
-            padding-top: 1.8rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .footer-note i {
-            margin: 0 0.2rem;
-            color: #b49278;
-        }
-
-        .footer-note .unpar-attr {
-            font-weight: 500;
-            color: #5d4a3b;
+        .fps-display {
+            font-family: 'Courier New', monospace;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
         }
 
         @media (max-width: 600px) {
-            .nama { font-size: 2.6rem; }
-            .profesi { font-size: 1.1rem; }
-            .bio-section { flex-direction: column; align-items: stretch; }
-            .btn-kontak { justify-content: center; }
-            .motto { font-size: 1rem; padding: 0.6rem 1.2rem; }
-            .badge-unpar { font-size: 0.75rem; padding: 0.3rem 1rem; }
-            .video-stream-wrapper { border-radius: 1.2rem; }
-        }
+            .container {
+                padding: 1rem;
+                border-radius: 1rem;
+            }
 
-        @media (max-width: 420px) {
-            .nama { font-size: 2.1rem; }
-            .card { padding: 1.5rem 1.2rem; }
-        }
+            h1 {
+                font-size: 1.3rem;
+            }
 
-        .highlight {
-            background: rgba(180, 140, 110, 0.08);
-            padding: 0.1rem 0.4rem;
-            border-radius: 8px;
-            font-weight: 500;
-            color: #4d362a;
-        }
+            .status-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
 
-        /* animasi masuk */
-        .card {
-            animation: masuk 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
+            .controls {
+                justify-content: center;
+            }
 
-        @keyframes masuk {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* pesan untuk browser yang memblokir mixed content */
-        .mixed-content-notice {
-            display: none;
-            padding: 0.8rem 1.2rem;
-            background: rgba(220, 180, 100, 0.15);
-            border: 1px solid rgba(220, 180, 100, 0.3);
-            border-radius: 12px;
-            color: #7a6a4a;
-            font-size: 0.85rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .mixed-content-notice i {
-            margin-right: 0.5rem;
-            color: #b8924a;
-        }
-
-        .mixed-content-notice a {
-            color: #7a5d46;
-            font-weight: 600;
-            text-decoration: underline;
+            .btn {
+                padding: 0.4rem 1.2rem;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- ornamen -->
-    <div class="bg-ornament">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
+
+    <div class="container">
+        <h1>🔮 FaceMesh Detection</h1>
+        <p class="subtitle">MediaPipe · 468 Landmark Wajah</p>
+
+        <div class="video-wrapper">
+            <video id="webcam" autoplay playsinline></video>
+            <canvas id="overlayCanvas"></canvas>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="dot" id="statusDot"></span>
+                <span id="statusText">Memulai...</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-user" style="opacity:0.5;"></i>
+                <span>Wajah terdeteksi: <span class="face-count" id="faceCount">0</span></span>
+            </div>
+            <div class="status-item fps-display">
+                <span id="fpsDisplay">FPS: 0</span>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" id="startBtn">▶ Mulai</button>
+                <button class="btn btn-danger" id="stopBtn">⏹ Berhenti</button>
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-        <!-- Peringatan Mixed Content (hanya untuk informasi) -->
-        <div class="mixed-content-notice" id="mixedNotice">
-            <i class="fas fa-info-circle"></i>
-            Stream menggunakan HTTP (tidak aman). Browser Anda mungkin memblokir konten ini. 
-            <a href="#" onclick="window.location.reload(); return false;">Klik di sini</a> untuk memuat ulang.
-        </div>
-
-        <!-- VIDEO STREAM dengan tag video -->
-        <div class="video-stream-wrapper" id="videoWrapper">
-            <video 
-                id="streamVideo"
-                autoplay 
-                muted 
-                playsinline
-                controls
-                preload="auto"
-                crossorigin="anonymous"
-            >
-                <source src="http://10.101.209.106" type="video/mp4">
-                <source src="http://10.101.209.106" type="video/ogg">
-                <source src="http://10.101.209.106" type="video/webm">
-                <!-- Fallback jika semua source gagal -->
-                <p>Browser Anda tidak mendukung video stream. 
-                <a href="http://10.101.209.106" target="_blank">Buka stream langsung</a></p>
-            </video>
-            
-            <!-- Label live -->
-            <div class="video-label">
-                <span class="live-dot"></span>
-                <i class="fas fa-video"></i> LIVE STREAM · UNPAR
-                <span style="margin: 0 0.3rem; opacity: 0.3;">|</span>
-                <i class="fas fa-signal"></i> 10.101.209.106
-            </div>
-
-            <!-- Fallback jika video gagal -->
-            <div class="stream-fallback" id="streamFallback">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Stream tidak dapat diakses. Kemungkinan diblokir oleh browser karena <strong>Mixed Content</strong>.</p>
-                <p style="font-size: 0.8rem; opacity: 0.7;">Buka langsung di tab baru:</p>
-                <a href="http://10.101.209.106" target="_blank" class="btn-stream" rel="noopener noreferrer">
-                    <i class="fas fa-external-link-alt"></i> Buka Stream
-                </a>
-            </div>
-        </div>
-
-        <!-- header -->
-        <div class="header">
-            <div class="badge-unpar">
-                <i class="fas fa-university"></i> UNPAR · FMIPA
-            </div>
-            <div class="divider-line"></div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <span style="font-size: 0.85rem; color: #7a6657; font-weight: 400; letter-spacing: 0.3px;">Fisika</span>
-                <i class="fas fa-atom" style="color: #a77b5e; font-size: 1.2rem;"></i>
-            </div>
-        </div>
-
-        <!-- identitas -->
-        <div class="identity">
-            <h1 class="nama">
-                Janto V. <span>Sulungbudi</span>
-            </h1>
-            <div class="profesi">
-                <span>
-                    <i class="fas fa-chalkboard-teacher"></i> Dosen Fisika
-                </span>
-                <span class="badge-fisika">
-                    <i class="fas fa-flask"></i> UNPAR
-                </span>
-                <span style="font-weight: 300; font-size: 0.9rem; color: #6d5b4d;">
-                    <i class="fas fa-map-pin" style="margin-right: 0.2rem;"></i> Bandung
-                </span>
-            </div>
-        </div>
-
-        <!-- motto -->
-        <div class="motto">
-            <i class="fas fa-quote-left"></i>
-            <q>Mengajarkan fisika bukan sekadar rumus, tetapi cara berpikir tentang alam semesta.</q>
-        </div>
-
-        <!-- bio -->
-        <div class="bio-section">
-            <div class="bio-text">
-                <p>
-                    <i class="fas fa-graduation-cap"></i> 
-                    <span class="highlight">Janto V. Sulungbudi</span> adalah dosen di Program Studi Fisika, 
-                    Universitas Katolik Parahyangan. Dengan latar belakang fisika teoretis dan 
-                    pengalaman mengajar lebih dari 15 tahun, ia aktif dalam penelitian 
-                    fisika material dan pendidikan sains.
-                </p>
-                <p>
-                    <i class="fas fa-microscope"></i> 
-                    Saat ini mengampu mata kuliah <span class="highlight">Fisika Dasar</span>, 
-                    <span class="highlight">Mekanika Klasik</span>, dan 
-                    <span class="highlight">Fisika Statistik</span>. 
-                    Janto juga terlibat dalam pengembangan kurikulum berbasis riset di UNPAR.
-                </p>
-                <div class="social-links">
-                    <a href="#" aria-label="Google Scholar"><i class="fas fa-graduation-cap"></i></a>
-                    <a href="#" aria-label="ResearchGate"><i class="fab fa-researchgate"></i></a>
-                    <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
-                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                </div>
-            </div>
-
-            <div class="btn-kontak">
-                <i class="fas fa-paper-plane"></i> Hubungi
-                <span style="font-weight: 300; margin-left: 0.2rem; opacity: 0.7;">|</span>
-                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
-            </div>
-        </div>
-
-        <!-- footer -->
-        <div class="footer-note">
-            <span>
-                <i class="fas fa-asterisk" style="font-size: 0.5rem;"></i> 
-                <span class="unpar-attr">UNPAR · Fisika</span> 
-                <i class="fas fa-circle" style="font-size: 0.3rem; vertical-align: middle; margin: 0 0.4rem;"></i> 
-                Bandung, Indonesia
-            </span>
-            <span>
-                <i class="far fa-calendar-alt"></i> 2026
-                <span style="margin: 0 0.5rem;">·</span>
-                <i class="fas fa-quote-right" style="opacity: 0.5;"></i>
-            </span>
-        </div>
-    </div>
+    <!-- MediaPipe Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
     <script>
         (function() {
-            const video = document.getElementById('streamVideo');
-            const fallback = document.getElementById('streamFallback');
-            const notice = document.getElementById('mixedNotice');
-            const wrapper = document.getElementById('videoWrapper');
+            // Elemen DOM
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('overlayCanvas');
+            const ctx = canvas.getContext('2d');
 
-            // Fungsi untuk menampilkan fallback
-            function showFallback() {
-                if (video.style.display !== 'none') {
-                    video.style.display = 'none';
-                    fallback.style.display = 'flex';
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const faceCount = document.getElementById('faceCount');
+            const fpsDisplay = document.getElementById('fpsDisplay');
+
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+
+            // State
+            let camera = null;
+            let faceMesh = null;
+            let isRunning = false;
+            let animationId = null;
+            let frameCount = 0;
+            let lastFpsUpdate = performance.now();
+
+            // Konfigurasi FaceMesh
+            const faceMeshConfig = {
+                maxNumFaces: 4,
+                refineLandmarks: true,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5,
+                selfieMode: true
+            };
+
+            // Inisialisasi FaceMesh
+            function initFaceMesh() {
+                faceMesh = new FaceMesh({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+                    }
+                });
+
+                faceMesh.setOptions(faceMeshConfig);
+
+                faceMesh.onResults(onResults);
+
+                // Event untuk loading status
+                faceMesh.initialize().then(() => {
+                    updateStatus('ready', 'Siap', 'active');
+                }).catch((err) => {
+                    console.error('FaceMesh initialization error:', err);
+                    updateStatus('error', 'Gagal memuat FaceMesh', 'inactive');
+                });
+            }
+
+            // Callback hasil deteksi
+            function onResults(results) {
+                // Bersihkan canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Gambar video di canvas sebagai background (mirror)
+                ctx.save();
+                ctx.scale(-1, 1);
+                ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+                ctx.restore();
+
+                if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                    // Update jumlah wajah
+                    faceCount.textContent = results.multiFaceLandmarks.length;
+
+                    // Gambar setiap wajah
+                    for (const landmarks of results.multiFaceLandmarks) {
+                        drawFaceMesh(landmarks);
+                    }
+
+                    updateStatus('detecting', `Deteksi ${results.multiFaceLandmarks.length} wajah`, 'active');
+                } else {
+                    faceCount.textContent = '0';
+                    updateStatus('idle', 'Tidak ada wajah terdeteksi', 'loading');
+                }
+
+                // Update FPS
+                frameCount++;
+                const now = performance.now();
+                if (now - lastFpsUpdate >= 1000) {
+                    const fps = Math.round(frameCount * 1000 / (now - lastFpsUpdate));
+                    fpsDisplay.textContent = `FPS: ${fps}`;
+                    frameCount = 0;
+                    lastFpsUpdate = now;
                 }
             }
 
-            // Cek apakah video bisa diputar
-            if (video) {
-                // Event listener untuk error
-                video.addEventListener('error', function(e) {
-                    console.warn('Video error:', e);
-                    // Cek kode error
-                    const errorCode = video.error ? video.error.code : -1;
-                    if (errorCode === 4 || errorCode === 3) {
-                        // MEDIA_ERR_SRC_NOT_SUPPORTED atau MEDIA_ERR_DECODE
-                        showFallback();
-                    } else {
-                        // Coba reload setelah delay
-                        setTimeout(() => {
-                            video.load();
-                        }, 3000);
+            // Fungsi menggambar FaceMesh
+            function drawFaceMesh(landmarks) {
+                // Warna gradasi untuk tiap titik
+                const baseColor = [245, 87, 108]; // Warna utama
+
+                // Gambar koneksi (mesh)
+                const connections = [
+                    // Iris kiri
+                    [468, 469], [469, 470], [470, 471], [471, 468],
+                    // Iris kanan
+                    [472, 473], [473, 474], [474, 475], [475, 472],
+                    // Bibir luar
+                    [61, 146], [146, 91], [91, 181], [181, 84], [84, 17],
+                    [17, 314], [314, 405], [405, 321], [321, 375], [375, 291],
+                    // Bibir dalam
+                    [78, 95], [95, 88], [88, 178], [178, 87], [87, 14],
+                    [14, 317], [317, 402], [402, 318], [318, 324], [324, 308],
+                    // Mata kiri
+                    [33, 7], [7, 163], [163, 144], [144, 145], [145, 153],
+                    [153, 154], [154, 155], [155, 133], [33, 133],
+                    // Mata kanan
+                    [263, 249], [249, 390], [390, 373], [373, 374], [374, 380],
+                    [380, 381], [381, 382], [382, 362], [263, 362],
+                    // Alis kiri
+                    [46, 53], [53, 52], [52, 65], [65, 55],
+                    // Alis kanan
+                    [276, 283], [283, 282], [282, 295], [295, 285],
+                    // Hidung
+                    [1, 2], [2, 98], [98, 327], [1, 19], [19, 94], [94, 327],
+                    // Kontur wajah
+                    [10, 338], [338, 297], [297, 332], [332, 284], [284, 251],
+                    [251, 389], [389, 356], [356, 454], [454, 323], [323, 361],
+                    [361, 288], [288, 397], [397, 365], [365, 379], [379, 378],
+                    [378, 400], [400, 377], [377, 152], [152, 148], [148, 176],
+                    [176, 149], [149, 150], [150, 136], [136, 172], [172, 58],
+                    [58, 132], [132, 93], [93, 234], [234, 127], [127, 162],
+                    [162, 21], [21, 54], [54, 103], [103, 67], [67, 109],
+                    [109, 10]
+                ];
+
+                // Gambar koneksi dengan warna gradasi
+                for (const [idx1, idx2] of connections) {
+                    if (idx1 < landmarks.length && idx2 < landmarks.length) {
+                        const p1 = landmarks[idx1];
+                        const p2 = landmarks[idx2];
+                        const x1 = p1.x * canvas.width;
+                        const y1 = p1.y * canvas.height;
+                        const x2 = p2.x * canvas.width;
+                        const y2 = p2.y * canvas.height;
+
+                        // Buat gradasi warna berdasarkan posisi y
+                        const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+                        const alpha = 0.6 + 0.3 * (1 - Math.abs(p1.y - 0.5) * 2);
+                        gradient.addColorStop(0, `rgba(${baseColor[0]}, ${baseColor[1] + 30}, ${baseColor[2] + 50}, ${alpha})`);
+                        gradient.addColorStop(1, `rgba(${baseColor[0] + 40}, ${baseColor[1]}, ${baseColor[2] + 20}, ${alpha})`);
+
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.strokeStyle = gradient;
+                        ctx.lineWidth = 1.2;
+                        ctx.stroke();
                     }
-                });
-
-                // Jika video stalled
-                video.addEventListener('stalled', function() {
-                    console.warn('Video stalled, reloading...');
-                    video.load();
-                });
-
-                // Jika gagal load
-                video.addEventListener('abort', function() {
-                    console.warn('Video load aborted');
-                    setTimeout(() => {
-                        video.load();
-                    }, 2000);
-                });
-
-                // Coba mainkan
-                video.addEventListener('canplay', function() {
-                    video.play().catch(err => {
-                        console.log('Autoplay blocked:', err);
-                        // Tampilkan kontrol agar user bisa play manual
-                    });
-                });
-
-                // Setelah 5 detik, cek apakah video berhasil dimuat
-                setTimeout(function() {
-                    if (video.readyState === 0 || video.networkState === 3) {
-                        // Belum ada data atau network error
-                        // Tapi kita tidak langsung tampilkan fallback, karena mungkin masih loading
-                        setTimeout(function() {
-                            if (video.readyState === 0) {
-                                showFallback();
-                            }
-                        }, 3000);
-                    }
-                }, 5000);
-
-                // Coba play saat halaman siap
-                video.play().catch(() => {});
-
-                // Jika ada error network (CORS/mixed content)
-                // Tidak bisa dideteksi langsung, tapi kita beri tombol reload
-                // Tampilkan notice jika ada error
-                setTimeout(function() {
-                    if (video.readyState === 0 && video.networkState === 2) {
-                        // Network error
-                        showFallback();
-                        notice.style.display = 'block';
-                    }
-                }, 8000);
-
-                // Jika user mengklik tombol di fallback
-                const btnStream = document.querySelector('.stream-fallback .btn-stream');
-                if (btnStream) {
-                    btnStream.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        window.open('http://10.101.209.106', '_blank', 'noopener,noreferrer');
-                    });
                 }
 
-                // Deteksi jika video berhasil dimuat, sembunyikan fallback
-                video.addEventListener('loadeddata', function() {
-                    if (fallback.style.display === 'flex') {
-                        fallback.style.display = 'none';
-                        video.style.display = 'block';
-                    }
-                    notice.style.display = 'none';
-                });
+                // Gambar titik landmark dengan efek glow
+                for (let i = 0; i < landmarks.length; i++) {
+                    const p = landmarks[i];
+                    const x = p.x * canvas.width;
+                    const y = p.y * canvas.height;
+                    const z = p.z || 0;
 
-                // Juga jika video sudah memiliki durasi
-                video.addEventListener('durationchange', function() {
-                    if (video.duration > 0) {
-                        if (fallback.style.display === 'flex') {
-                            fallback.style.display = 'none';
-                            video.style.display = 'block';
+                    // Ukuran titik berdasarkan kedalaman
+                    const size = 2 + (1 - Math.abs(z)) * 2;
+
+                    // Efek glow
+                    const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 3);
+                    gradient.addColorStop(0, `rgba(${baseColor[0] + 30}, ${baseColor[1] + 50}, 255, 0.9)`);
+                    gradient.addColorStop(0.5, `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2] + 80}, 0.5)`);
+                    gradient.addColorStop(1, `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2] + 100}, 0)`);
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, size * 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+
+                    // Titik utama
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, 0.85)`;
+                    ctx.fill();
+
+                    // Outline titik
+                    ctx.beginPath();
+                    ctx.arc(x, y, size + 1, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(${baseColor[0] + 20}, ${baseColor[1] + 40}, 255, 0.3)`;
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                }
+            }
+
+            // Update status UI
+            function updateStatus(state, text, dotClass) {
+                statusText.textContent = text;
+                statusDot.className = 'dot';
+                if (dotClass) {
+                    statusDot.classList.add(dotClass);
+                }
+            }
+
+            // Inisialisasi kamera
+            async function startCamera() {
+                try {
+                    // Aktifkan kamera
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user'
                         }
-                        notice.style.display = 'none';
+                    });
+                    video.srcObject = stream;
+                    await video.play();
+
+                    // Set canvas size
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
+
+                    updateStatus('starting', 'Kamera aktif, memuat FaceMesh...', 'loading');
+
+                    // Inisialisasi FaceMesh jika belum
+                    if (!faceMesh) {
+                        initFaceMesh();
                     }
-                });
+
+                    // Mulai deteksi
+                    isRunning = true;
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+
+                    // Loop deteksi
+                    detectLoop();
+
+                    updateStatus('running', 'FaceMesh berjalan', 'active');
+
+                } catch (err) {
+                    console.error('Error accessing camera:', err);
+                    updateStatus('error', 'Gagal akses kamera: ' + err.message, 'inactive');
+                    alert('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.');
+                }
             }
 
-            // Tampilkan notice jika ada peringatan mixed content (hanya informasi)
-            if (window.location.protocol === 'https:') {
-                // Halaman di-load dengan HTTPS, stream HTTP mungkin diblokir
-                // Tapi kita tetap mencoba menampilkan
-                console.log('Halaman HTTPS, stream HTTP mungkin diblokir oleh browser.');
-                // Kita tampilkan notice setelah beberapa detik jika video tidak jalan
-                setTimeout(function() {
-                    if (video && video.readyState === 0) {
-                        notice.style.display = 'block';
+            // Loop deteksi menggunakan requestAnimationFrame
+            function detectLoop() {
+                if (!isRunning) return;
+
+                if (video.readyState >= 2) {
+                    try {
+                        faceMesh.send({ image: video });
+                    } catch (err) {
+                        console.error('Detection error:', err);
                     }
-                }, 4000);
+                }
+
+                animationId = requestAnimationFrame(detectLoop);
             }
+
+            // Hentikan deteksi
+            function stopCamera() {
+                isRunning = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+
+                // Hentikan stream video
+                if (video.srcObject) {
+                    const tracks = video.srcObject.getTracks();
+                    tracks.forEach(track => track.stop());
+                    video.srcObject = null;
+                }
+
+                // Bersihkan canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                updateStatus('stopped', 'Dihentikan', 'inactive');
+                faceCount.textContent = '0';
+                fpsDisplay.textContent = 'FPS: 0';
+            }
+
+            // Event listeners
+            startBtn.addEventListener('click', startCamera);
+            stopBtn.addEventListener('click', stopCamera);
+
+            // Inisialisasi awal
+            updateStatus('idle', 'Klik "Mulai" untuk memulai', 'inactive');
+            stopBtn.disabled = true;
+
+            // Resize canvas saat video berubah
+            video.addEventListener('loadedmetadata', () => {
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+            });
+
+            // Cleanup saat halaman ditutup
+            window.addEventListener('beforeunload', () => {
+                if (isRunning) {
+                    stopCamera();
+                }
+            });
+
+            // Inisialisasi FaceMesh di awal untuk preload
+            initFaceMesh();
+
+            console.log('FaceMesh Detection siap!');
+            console.log('Klik "Mulai" untuk mengakses kamera dan memulai deteksi wajah.');
+
         })();
     </script>
+
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
