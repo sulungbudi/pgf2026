@@ -1,1 +1,484 @@
-selamat datang
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Janto V. Sulungbudi · Dosen Fisika UNPAR</title>
+    <!-- Font yang elegan & modern -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (gratis) untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #f5f0eb 0%, #e8e0d8 100%);
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* background dengan ornamen partikel/abstrak (hanya estetika) */
+        .bg-ornament {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-ornament span {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(180, 140, 110, 0.06);
+            border-radius: 50%;
+            animation: float 18s infinite alternate ease-in-out;
+        }
+
+        .bg-ornament span:nth-child(1) { top: 10%; left: 5%; width: 60px; height: 60px; animation-duration: 22s; }
+        .bg-ornament span:nth-child(2) { top: 70%; left: 85%; width: 40px; height: 40px; animation-duration: 26s; background: rgba(200, 170, 140, 0.05); }
+        .bg-ornament span:nth-child(3) { top: 40%; left: 20%; width: 80px; height: 80px; animation-duration: 20s; background: rgba(160, 130, 100, 0.04); }
+        .bg-ornament span:nth-child(4) { top: 80%; left: 10%; width: 30px; height: 30px; animation-duration: 28s; }
+        .bg-ornament span:nth-child(5) { top: 15%; left: 75%; width: 50px; height: 50px; animation-duration: 24s; background: rgba(190, 160, 130, 0.05); }
+        .bg-ornament span:nth-child(6) { top: 55%; left: 60%; width: 70px; height: 70px; animation-duration: 30s; background: rgba(140, 110, 80, 0.03); }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            100% { transform: translate(40px, -30px) scale(1.2) rotate(15deg); }
+        }
+
+        /* Kartu utama — elegan, hangat, & premium */
+        .card {
+            position: relative;
+            z-index: 10;
+            max-width: 820px;
+            width: 100%;
+            background: rgba(255, 251, 247, 0.85);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-radius: 3.5rem 3.5rem 3.5rem 1.5rem;
+            box-shadow: 
+                0 30px 60px -20px rgba(60, 40, 25, 0.25),
+                0 8px 20px rgba(0, 0, 0, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            padding: 2.8rem 3rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 242, 235, 0.5);
+        }
+
+        @media (max-width: 550px) {
+            .card {
+                padding: 2rem 1.5rem;
+                border-radius: 2.5rem 2.5rem 2.5rem 1rem;
+            }
+        }
+
+        /* header dengan garis dekoratif */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .badge-unpar {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: #2c241e;
+            color: #f2e7df;
+            padding: 0.5rem 1.5rem 0.5rem 1.2rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .badge-unpar i {
+            font-size: 1rem;
+            color: #d4b8a0;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 2px;
+            min-width: 40px;
+            background: linear-gradient(90deg, #dacfc6, transparent);
+            margin-left: 0.5rem;
+        }
+
+        /* nama & title */
+        .identity {
+            margin-bottom: 2rem;
+        }
+
+        .nama {
+            font-size: 3.8rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: #1e1612;
+            margin-bottom: 0.3rem;
+        }
+
+        .nama span {
+            background: linear-gradient(135deg, #a67b5c, #7a5d46);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .profesi {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem 1.5rem;
+            font-size: 1.35rem;
+            font-weight: 400;
+            color: #3e322a;
+            border-bottom: 2px solid rgba(180, 150, 130, 0.2);
+            padding-bottom: 1rem;
+        }
+
+        .profesi i {
+            color: #a77b5e;
+            margin-right: 0.3rem;
+            width: 1.6rem;
+            text-align: center;
+        }
+
+        .profesi .badge-fisika {
+            background: #e8ddd4;
+            padding: 0.2rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #3d2c20;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profesi .badge-fisika i {
+            font-size: 0.9rem;
+            margin-right: 0;
+        }
+
+        /* kutipan / motto pendek */
+        .motto {
+            margin: 2rem 0 2.2rem 0;
+            padding: 0.8rem 1.8rem;
+            background: rgba(220, 200, 185, 0.2);
+            border-left: 4px solid #b49278;
+            border-radius: 0 30px 30px 0;
+            font-style: italic;
+            font-weight: 300;
+            font-size: 1.15rem;
+            color: #3d322b;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            backdrop-filter: blur(2px);
+        }
+
+        .motto i {
+            color: #b49278;
+            font-size: 1.6rem;
+            opacity: 0.7;
+        }
+
+        .motto q {
+            quotes: "“" "”" "‘" "’";
+        }
+
+        /* bio singkat + tombol */
+        .bio-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 0.8rem;
+            align-items: flex-end;
+        }
+
+        .bio-text {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .bio-text p {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #3d342e;
+            font-weight: 400;
+            margin-bottom: 1.2rem;
+        }
+
+        .bio-text p i {
+            color: #8d6b53;
+            width: 1.6rem;
+            margin-right: 0.2rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+            margin-top: 0.8rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 60px;
+            background: rgba(50, 38, 30, 0.04);
+            color: #3d322a;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(180, 155, 135, 0.15);
+            text-decoration: none;
+            backdrop-filter: blur(2px);
+        }
+
+        .social-links a:hover {
+            background: #2c241e;
+            color: #f0e3da;
+            border-color: #2c241e;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(60, 40, 25, 0.12);
+        }
+
+        .btn-kontak {
+            flex: 0 0 auto;
+            background: #2c241e;
+            color: #f5ede7;
+            padding: 0.9rem 2.2rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            border: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 18px rgba(44, 36, 30, 0.15);
+            cursor: default;
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-kontak i {
+            font-size: 1.1rem;
+            color: #dac0ae;
+        }
+
+        .btn-kontak:hover {
+            background: #1f1814;
+            transform: scale(1.01);
+            box-shadow: 0 12px 24px rgba(44, 36, 30, 0.2);
+        }
+
+        /* footer kecil */
+        .footer-note {
+            margin-top: 2.8rem;
+            font-size: 0.75rem;
+            color: #89786b;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(180, 155, 135, 0.15);
+            padding-top: 1.8rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .footer-note i {
+            margin: 0 0.2rem;
+            color: #b49278;
+        }
+
+        .footer-note .unpar-attr {
+            font-weight: 500;
+            color: #5d4a3b;
+        }
+
+        /* responsive */
+        @media (max-width: 600px) {
+            .nama {
+                font-size: 2.6rem;
+            }
+            .profesi {
+                font-size: 1.1rem;
+            }
+            .bio-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-kontak {
+                justify-content: center;
+            }
+            .motto {
+                font-size: 1rem;
+                padding: 0.6rem 1.2rem;
+            }
+            .badge-unpar {
+                font-size: 0.75rem;
+                padding: 0.3rem 1rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .nama {
+                font-size: 2.1rem;
+            }
+            .card {
+                padding: 1.5rem 1.2rem;
+            }
+        }
+
+        /* highlight */
+        .highlight {
+            background: rgba(180, 140, 110, 0.08);
+            padding: 0.1rem 0.4rem;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #4d362a;
+        }
+
+        /* animasi subtle */
+        .card {
+            animation: masuk 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes masuk {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-1 { animation-delay: 0.05s; }
+        .delay-2 { animation-delay: 0.15s; }
+        .delay-3 { animation-delay: 0.25s; }
+    </style>
+</head>
+<body>
+    <!-- ornamen latar belakang (partikel abstrak) -->
+    <div class="bg-ornament">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="card">
+        <!-- header: logo UNPAR + dekorasi -->
+        <div class="header">
+            <div class="badge-unpar">
+                <i class="fas fa-university"></i> UNPAR · FMIPA
+            </div>
+            <div class="divider-line"></div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span style="font-size: 0.85rem; color: #7a6657; font-weight: 400; letter-spacing: 0.3px;">Fisika</span>
+                <i class="fas fa-atom" style="color: #a77b5e; font-size: 1.2rem;"></i>
+            </div>
+        </div>
+
+        <!-- identitas utama -->
+        <div class="identity">
+            <h1 class="nama">
+                Janto V. <span>Sulungbudi</span>
+            </h1>
+            <div class="profesi">
+                <span>
+                    <i class="fas fa-chalkboard-teacher"></i> Dosen Fisika
+                </span>
+                <span class="badge-fisika">
+                    <i class="fas fa-flask"></i> UNPAR
+                </span>
+                <span style="font-weight: 300; font-size: 0.9rem; color: #6d5b4d;">
+                    <i class="fas fa-map-pin" style="margin-right: 0.2rem;"></i> Bandung
+                </span>
+            </div>
+        </div>
+
+        <!-- motto / kutipan -->
+        <div class="motto">
+            <i class="fas fa-quote-left"></i>
+            <q>Mengajarkan fisika bukan sekadar rumus, tetapi cara berpikir tentang alam semesta.</q>
+        </div>
+
+        <!-- bio dan aksi -->
+        <div class="bio-section">
+            <div class="bio-text">
+                <p>
+                    <i class="fas fa-graduation-cap"></i> 
+                    <span class="highlight">Janto V. Sulungbudi</span> adalah dosen di Program Studi Fisika, 
+                    Universitas Katolik Parahyangan. Dengan latar belakang fisika teoretis dan 
+                    pengalaman mengajar lebih dari 15 tahun, ia aktif dalam penelitian 
+                    fisika material dan pendidikan sains.
+                </p>
+                <p>
+                    <i class="fas fa-microscope"></i> 
+                    Saat ini mengampu mata kuliah <span class="highlight">Fisika Dasar</span>, 
+                    <span class="highlight">Mekanika Klasik</span>, dan 
+                    <span class="highlight">Fisika Statistik</span>. 
+                    Janto juga terlibat dalam pengembangan kurikulum berbasis riset di UNPAR.
+                </p>
+                <!-- social icons -->
+                <div class="social-links">
+                    <a href="#" aria-label="Google Scholar"><i class="fas fa-graduation-cap"></i></a>
+                    <a href="#" aria-label="ResearchGate"><i class="fab fa-researchgate"></i></a>
+                    <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <div class="btn-kontak">
+                <i class="fas fa-paper-plane"></i> Hubungi
+                <span style="font-weight: 300; margin-left: 0.2rem; opacity: 0.7;">|</span>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+            </div>
+        </div>
+
+        <!-- footer elegan -->
+        <div class="footer-note">
+            <span>
+                <i class="fas fa-asterisk" style="font-size: 0.5rem;"></i> 
+                <span class="unpar-attr">UNPAR · Fisika</span> 
+                <i class="fas fa-circle" style="font-size: 0.3rem; vertical-align: middle; margin: 0 0.4rem;"></i> 
+                Bandung, Indonesia
+            </span>
+            <span>
+                <i class="far fa-calendar-alt"></i> 2026
+                <span style="margin: 0 0.5rem;">·</span>
+                <i class="fas fa-quote-right" style="opacity: 0.5;"></i>
+            </span>
+        </div>
+    </div>
+
+    <!-- (opsional) sedikit interaksi: hover pada tombol tidak melakukan apapun, hanya estetika -->
+</body>
+</html>
