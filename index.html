@@ -54,6 +54,31 @@
             letter-spacing: 1px;
         }
 
+        .mixed-content-warning {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 1rem;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .mixed-content-warning i {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+
+        .mixed-content-warning a {
+            color: #f093fb;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
         .video-wrapper {
             position: relative;
             border-radius: 1.5rem;
@@ -171,6 +196,16 @@
             background: rgba(239, 68, 68, 0.5);
         }
 
+        .btn-warning {
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+
+        .btn-warning:hover {
+            background: rgba(251, 191, 36, 0.3);
+        }
+
         .face-count {
             font-weight: 600;
             color: #f093fb;
@@ -191,6 +226,12 @@
 
             h1 {
                 font-size: 1.3rem;
+            }
+
+            .mixed-content-warning {
+                font-size: 0.75rem;
+                padding: 0.6rem 1rem;
+                flex-wrap: wrap;
             }
 
             .status-bar {
@@ -215,6 +256,16 @@
         <h1>🔮 FaceMesh Detection</h1>
         <p class="subtitle">MediaPipe · 468 Landmark Wajah</p>
 
+        <!-- Peringatan Mixed Content -->
+        <div class="mixed-content-warning" id="mixedWarning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>
+                <strong>Mixed Content:</strong> Halaman di-load melalui HTTPS, tetapi beberapa resource mungkin dimuat melalui HTTP. 
+                <a href="#" onclick="allowMixedContent(); return false;">Izinkan konten campuran</a> atau 
+                <a href="#" onclick="reloadWithMixed(); return false;">muat ulang dengan pengaturan khusus</a>.
+            </span>
+        </div>
+
         <div class="video-wrapper">
             <video id="webcam" autoplay playsinline></video>
             <canvas id="overlayCanvas"></canvas>
@@ -235,11 +286,12 @@
             <div class="controls">
                 <button class="btn btn-primary" id="startBtn">▶ Mulai</button>
                 <button class="btn btn-danger" id="stopBtn">⏹ Berhenti</button>
+                <button class="btn btn-warning" id="reloadBtn">⟳ Muat Ulang</button>
             </div>
         </div>
     </div>
 
-    <!-- MediaPipe Dependencies -->
+    <!-- MediaPipe Dependencies - Menggunakan HTTPS -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
@@ -258,6 +310,8 @@
 
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
+            const reloadBtn = document.getElementById('reloadBtn');
+            const mixedWarning = document.getElementById('mixedWarning');
 
             // State
             let camera = null;
@@ -276,25 +330,103 @@
                 selfieMode: true
             };
 
+            // Fungsi untuk mengizinkan mixed content
+            window.allowMixedContent = function() {
+                // Mengirim pesan ke console untuk informasi
+                console.log('Mengizinkan mixed content...');
+                // Sembunyikan warning
+                mixedWarning.style.display = 'none';
+                // Reload FaceMesh dengan pengaturan khusus
+                if (faceMesh) {
+                    try {
+                        faceMesh.initialize().then(() => {
+                            updateStatus('ready', 'Siap (mixed content diizinkan)', 'active');
+                        });
+                    } catch (e) {
+                        console.warn('Error reinitializing:', e);
+                    }
+                }
+                // Tampilkan notifikasi
+                showNotification('Mixed content diizinkan. Silakan mulai deteksi.');
+            };
+
+            // Fungsi untuk reload dengan meta tag
+            window.reloadWithMixed = function() {
+                // Tambahkan meta tag untuk mengizinkan mixed content
+                const meta = document.createElement('meta');
+                meta.httpEquiv = 'Content-Security-Policy';
+                meta.content = "upgrade-insecure-requests";
+                document.head.appendChild(meta);
+                
+                // Reload halaman
+                window.location.reload();
+            };
+
+            // Fungsi notifikasi sederhana
+            function showNotification(message) {
+                const existing = document.querySelector('.toast-notification');
+                if (existing) existing.remove();
+                
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 2rem;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0,0,0,0.9);
+                    color: #fff;
+                    padding: 1rem 2rem;
+                    border-radius: 1rem;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    z-index: 1000;
+                    max-width: 90%;
+                    text-align: center;
+                    animation: fadeInUp 0.3s ease;
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
             // Inisialisasi FaceMesh
             function initFaceMesh() {
-                faceMesh = new FaceMesh({
-                    locateFile: (file) => {
-                        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-                    }
-                });
+                try {
+                    faceMesh = new FaceMesh({
+                        locateFile: (file) => {
+                            // Gunakan HTTPS untuk menghindari mixed content
+                            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+                        }
+                    });
 
-                faceMesh.setOptions(faceMeshConfig);
+                    faceMesh.setOptions(faceMeshConfig);
 
-                faceMesh.onResults(onResults);
+                    faceMesh.onResults(onResults);
 
-                // Event untuk loading status
-                faceMesh.initialize().then(() => {
-                    updateStatus('ready', 'Siap', 'active');
-                }).catch((err) => {
-                    console.error('FaceMesh initialization error:', err);
-                    updateStatus('error', 'Gagal memuat FaceMesh', 'inactive');
-                });
+                    // Event untuk loading status
+                    faceMesh.initialize().then(() => {
+                        updateStatus('ready', 'Siap', 'active');
+                        mixedWarning.style.display = 'none';
+                    }).catch((err) => {
+                        console.error('FaceMesh initialization error:', err);
+                        // Jika error karena mixed content, tampilkan warning
+                        if (err.message && err.message.includes('mixed')) {
+                            mixedWarning.style.display = 'flex';
+                            updateStatus('error', 'Mixed content blocking FaceMesh', 'inactive');
+                        } else {
+                            updateStatus('error', 'Gagal memuat FaceMesh', 'inactive');
+                        }
+                    });
+                } catch (err) {
+                    console.error('Error creating FaceMesh:', err);
+                    updateStatus('error', 'Gagal membuat FaceMesh', 'inactive');
+                    mixedWarning.style.display = 'flex';
+                }
             }
 
             // Callback hasil deteksi
@@ -336,34 +468,23 @@
 
             // Fungsi menggambar FaceMesh
             function drawFaceMesh(landmarks) {
-                // Warna gradasi untuk tiap titik
-                const baseColor = [245, 87, 108]; // Warna utama
+                const baseColor = [245, 87, 108];
 
-                // Gambar koneksi (mesh)
+                // Koneksi utama FaceMesh
                 const connections = [
-                    // Iris kiri
                     [468, 469], [469, 470], [470, 471], [471, 468],
-                    // Iris kanan
                     [472, 473], [473, 474], [474, 475], [475, 472],
-                    // Bibir luar
                     [61, 146], [146, 91], [91, 181], [181, 84], [84, 17],
                     [17, 314], [314, 405], [405, 321], [321, 375], [375, 291],
-                    // Bibir dalam
                     [78, 95], [95, 88], [88, 178], [178, 87], [87, 14],
                     [14, 317], [317, 402], [402, 318], [318, 324], [324, 308],
-                    // Mata kiri
                     [33, 7], [7, 163], [163, 144], [144, 145], [145, 153],
                     [153, 154], [154, 155], [155, 133], [33, 133],
-                    // Mata kanan
                     [263, 249], [249, 390], [390, 373], [373, 374], [374, 380],
                     [380, 381], [381, 382], [382, 362], [263, 362],
-                    // Alis kiri
                     [46, 53], [53, 52], [52, 65], [65, 55],
-                    // Alis kanan
                     [276, 283], [283, 282], [282, 295], [295, 285],
-                    // Hidung
                     [1, 2], [2, 98], [98, 327], [1, 19], [19, 94], [94, 327],
-                    // Kontur wajah
                     [10, 338], [338, 297], [297, 332], [332, 284], [284, 251],
                     [251, 389], [389, 356], [356, 454], [454, 323], [323, 361],
                     [361, 288], [288, 397], [397, 365], [365, 379], [379, 378],
@@ -374,7 +495,7 @@
                     [109, 10]
                 ];
 
-                // Gambar koneksi dengan warna gradasi
+                // Gambar koneksi
                 for (const [idx1, idx2] of connections) {
                     if (idx1 < landmarks.length && idx2 < landmarks.length) {
                         const p1 = landmarks[idx1];
@@ -384,7 +505,6 @@
                         const x2 = p2.x * canvas.width;
                         const y2 = p2.y * canvas.height;
 
-                        // Buat gradasi warna berdasarkan posisi y
                         const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
                         const alpha = 0.6 + 0.3 * (1 - Math.abs(p1.y - 0.5) * 2);
                         gradient.addColorStop(0, `rgba(${baseColor[0]}, ${baseColor[1] + 30}, ${baseColor[2] + 50}, ${alpha})`);
@@ -399,17 +519,15 @@
                     }
                 }
 
-                // Gambar titik landmark dengan efek glow
+                // Gambar titik landmark
                 for (let i = 0; i < landmarks.length; i++) {
                     const p = landmarks[i];
                     const x = p.x * canvas.width;
                     const y = p.y * canvas.height;
                     const z = p.z || 0;
 
-                    // Ukuran titik berdasarkan kedalaman
                     const size = 2 + (1 - Math.abs(z)) * 2;
 
-                    // Efek glow
                     const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 3);
                     gradient.addColorStop(0, `rgba(${baseColor[0] + 30}, ${baseColor[1] + 50}, 255, 0.9)`);
                     gradient.addColorStop(0.5, `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2] + 80}, 0.5)`);
@@ -420,13 +538,11 @@
                     ctx.fillStyle = gradient;
                     ctx.fill();
 
-                    // Titik utama
                     ctx.beginPath();
                     ctx.arc(x, y, size, 0, Math.PI * 2);
                     ctx.fillStyle = `rgba(255, 255, 255, 0.85)`;
                     ctx.fill();
 
-                    // Outline titik
                     ctx.beginPath();
                     ctx.arc(x, y, size + 1, 0, Math.PI * 2);
                     ctx.strokeStyle = `rgba(${baseColor[0] + 20}, ${baseColor[1] + 40}, 255, 0.3)`;
@@ -447,7 +563,6 @@
             // Inisialisasi kamera
             async function startCamera() {
                 try {
-                    // Aktifkan kamera
                     const stream = await navigator.mediaDevices.getUserMedia({
                         video: {
                             width: { ideal: 640 },
@@ -458,23 +573,19 @@
                     video.srcObject = stream;
                     await video.play();
 
-                    // Set canvas size
                     canvas.width = video.videoWidth || 640;
                     canvas.height = video.videoHeight || 480;
 
                     updateStatus('starting', 'Kamera aktif, memuat FaceMesh...', 'loading');
 
-                    // Inisialisasi FaceMesh jika belum
                     if (!faceMesh) {
                         initFaceMesh();
                     }
 
-                    // Mulai deteksi
                     isRunning = true;
                     startBtn.disabled = true;
                     stopBtn.disabled = false;
 
-                    // Loop deteksi
                     detectLoop();
 
                     updateStatus('running', 'FaceMesh berjalan', 'active');
@@ -486,11 +597,11 @@
                 }
             }
 
-            // Loop deteksi menggunakan requestAnimationFrame
+            // Loop deteksi
             function detectLoop() {
                 if (!isRunning) return;
 
-                if (video.readyState >= 2) {
+                if (video.readyState >= 2 && faceMesh) {
                     try {
                         faceMesh.send({ image: video });
                     } catch (err) {
@@ -512,14 +623,12 @@
                     animationId = null;
                 }
 
-                // Hentikan stream video
                 if (video.srcObject) {
                     const tracks = video.srcObject.getTracks();
                     tracks.forEach(track => track.stop());
                     video.srcObject = null;
                 }
 
-                // Bersihkan canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 updateStatus('stopped', 'Dihentikan', 'inactive');
@@ -530,29 +639,46 @@
             // Event listeners
             startBtn.addEventListener('click', startCamera);
             stopBtn.addEventListener('click', stopCamera);
+            reloadBtn.addEventListener('click', () => {
+                window.location.reload();
+            });
 
             // Inisialisasi awal
             updateStatus('idle', 'Klik "Mulai" untuk memulai', 'inactive');
             stopBtn.disabled = true;
 
-            // Resize canvas saat video berubah
             video.addEventListener('loadedmetadata', () => {
                 canvas.width = video.videoWidth || 640;
                 canvas.height = video.videoHeight || 480;
             });
 
-            // Cleanup saat halaman ditutup
             window.addEventListener('beforeunload', () => {
                 if (isRunning) {
                     stopCamera();
                 }
             });
 
-            // Inisialisasi FaceMesh di awal untuk preload
+            // Inisialisasi FaceMesh
             initFaceMesh();
 
             console.log('FaceMesh Detection siap!');
             console.log('Klik "Mulai" untuk mengakses kamera dan memulai deteksi wajah.');
+
+            // Style tambahan untuk notifikasi
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
 
         })();
     </script>
